@@ -1,0 +1,28 @@
+:root {
+    box-sizing: border-box;
+}
+
+.mediaWrapper {
+    height: 500px;
+}
+
+.videoWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.imageWrapper img {
+    width: calc(10% - 0.5rem);
+}
+
+.videoWrapper video {
+    width: 100%;
+}
+.textAreaWrapper {
+    height: 100%;
+}
+
+.textAreaWrapper > textarea {
+    height: 100%;
+}
