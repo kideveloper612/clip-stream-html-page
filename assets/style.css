@@ -3,7 +3,11 @@
 }
 
 .mediaWrapper {
-    height: 500px;
+    min-height: 500px;
+}
+
+.mediaWrapper textarea {
+    min-height: 500px;
 }
 
 .videoWrapper {
