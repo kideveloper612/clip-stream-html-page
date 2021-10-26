@@ -16,7 +16,7 @@
     justify-content: center;
 }
 
-.imageWrapper img {
+.imageWrapper canvas {
     width: calc(10% - 0.5rem);
 }
 
