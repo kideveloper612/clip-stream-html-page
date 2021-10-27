@@ -32,7 +32,7 @@
                     <i class="fa fa-upload"></i> Load Video
                 </a>
                 <form id="uploadForm" ref="uploadForm" action='/upload' method='post' enctype="multipart/form-data">
-                    <input type="file" name="file" accept="video/*" style="display: none" onchange="loadVideo(event)">
+                    <input type="file" name="file" accept="video/*" style="display: none" onchange="initialLoad(event)">
                 </form>
                 <div id="loading-container" style="display:none">Loading...</div>
 

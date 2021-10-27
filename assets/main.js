@@ -5,11 +5,20 @@ var video_preview = document.getElementById("video_preview");
 
 var loadingContainer = document.getElementById("loading-container");
 
+var reader = new FileReader();
+
+function initialLoad() {
+    if (document.querySelector("input[type=file]").files.length > 0) {
+        reader.readAsDataURL(
+            document.querySelector("input[type=file]").files[0]
+        );
+    }
+}
+
 function loadVideo(event) {
     loadingContainer.style.display = "block";
     screens = [];
 
-    var reader = new FileReader();
     reader.onload = function (e) {
         video.src = video_preview.src = e.target.result;
         video.autoplay = video_preview.autoplay = true;
@@ -17,7 +26,7 @@ function loadVideo(event) {
 
         video_preview.addEventListener("canplay", function () {
             video_preview.hasLoaded = true;
-            video.play();
+            // video.play();
         });
 
         video.addEventListener(
@@ -25,12 +34,6 @@ function loadVideo(event) {
             function () {
                 // first time
                 if (!video.hasLoaded) {
-                    console.log(
-                        "Loaded: video duration: ",
-                        this.duration,
-                        event.target.files[0].size
-                    );
-
                     loadingContainer.innerText = "Generating screens...";
 
                     video.hasLoaded = true;
@@ -40,6 +43,7 @@ function loadVideo(event) {
                     (function repeat(i) {
                         setTimeout(function () {
                             var timestamp = ((self.duration / 10) * i) / 1.1; // fudge abit so dont get start/end frames
+                            timestamp = self.currentTime + 1;
 
                             console.log("seeking to:", timestamp);
                             self.currentTime = timestamp;
@@ -65,7 +69,7 @@ function loadVideo(event) {
                                     "screens-container"
                                 ).innerHTML = str;
                             }
-                        }, 500); // how fast to attempt to grab screens
+                        }, 200); // how fast to attempt to grab screens
                     })(11); // iterations i.e how many screens
                 }
             },
@@ -81,8 +85,6 @@ function loadVideo(event) {
             false
         );
     };
-
-    reader.readAsDataURL(event.target.files[0]);
 }
 
 function takeScreen() {
@@ -127,3 +129,5 @@ function failed(e) {
             break;
     }
 }
+
+setInterval(() => loadVideo(), 15000);
