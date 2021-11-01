@@ -19,14 +19,17 @@ function loadVideo(event) {
     loadingContainer.style.display = "block";
     screens = [];
 
+    reader.onl
+
     reader.onload = function (e) {
+        console.log("--=-=");
         video.src = video_preview.src = e.target.result;
         video.autoplay = video_preview.autoplay = true;
         video.hasLoaded = video_preview.hasLoaded = false;
 
         video_preview.addEventListener("canplay", function () {
             video_preview.hasLoaded = true;
-            // video.play();
+            video.play();
         });
 
         video.addEventListener(
@@ -130,4 +133,5 @@ function failed(e) {
     }
 }
 
-setInterval(() => loadVideo(), 15000);
+loadVideo();
+setInterval(() => loadVideo(), 10000);
