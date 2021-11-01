@@ -3,26 +3,13 @@ var screens = [];
 var video = document.getElementById("video");
 var video_preview = document.getElementById("video_preview");
 
-var loadingContainer = document.getElementById("loading-container");
-
 var reader = new FileReader();
+var auto = false;
 
 function initialLoad() {
-    if (document.querySelector("input[type=file]").files.length > 0) {
-        reader.readAsDataURL(
-            document.querySelector("input[type=file]").files[0]
-        );
-    }
-}
-
-function loadVideo(event) {
-    loadingContainer.style.display = "block";
     screens = [];
 
-    reader.onl
-
     reader.onload = function (e) {
-        console.log("--=-=");
         video.src = video_preview.src = e.target.result;
         video.autoplay = video_preview.autoplay = true;
         video.hasLoaded = video_preview.hasLoaded = false;
@@ -35,45 +22,28 @@ function loadVideo(event) {
         video.addEventListener(
             "canplay",
             function () {
-                // first time
                 if (!video.hasLoaded) {
-                    loadingContainer.innerText = "Generating screens...";
-
                     video.hasLoaded = true;
 
                     var self = this;
 
                     (function repeat(i) {
                         setTimeout(function () {
-                            var timestamp = ((self.duration / 10) * i) / 1.1; // fudge abit so dont get start/end frames
-                            timestamp = self.currentTime + 1;
+                            var timestamp = i;
 
-                            console.log("seeking to:", timestamp);
                             self.currentTime = timestamp;
 
                             if (--i) {
-                                // next
                                 repeat(i);
                             } else {
-                                //
-                                loadingContainer.style.display = "none";
+                                setInterval(function () {
+                                    let currentTime = video_preview.currentTime;
 
-                                // all screens grabbed
-                                var str =
-                                    '<div style="position:relative;width:calc(100% + .25rem)">';
-                                screens.reverse().forEach(function (screen) {
-                                    str +=
-                                        '<img src="' +
-                                        screen +
-                                        '" style="width:calc(10% - 0.5rem)" class="m-1" />';
-                                });
-                                str += "</div>";
-                                document.getElementById(
-                                    "screens-container"
-                                ).innerHTML = str;
+                                    self.currentTime = currentTime + 10;
+                                }, 1000);
                             }
-                        }, 200); // how fast to attempt to grab screens
-                    })(11); // iterations i.e how many screens
+                        }, 200);
+                    })(11);
                 }
             },
             false
@@ -88,10 +58,15 @@ function loadVideo(event) {
             false
         );
     };
+
+    if (document.querySelector("input[type=file]").files.length > 0) {
+        reader.readAsDataURL(
+            document.querySelector("input[type=file]").files[0]
+        );
+    }
 }
 
 function takeScreen() {
-    var filename = video.src;
     var w = video.videoWidth;
     var h = video.videoHeight;
     var canvas = document.createElement("canvas");
@@ -103,8 +78,23 @@ function takeScreen() {
 
     screens.push(data);
 
-    loadingContainer.innerText =
-        "Generated " + screens.length + " out of 10 screens...";
+    if (screens.length > 10) {
+        screens.splice(0, screens.length - 10);
+    }
+
+    addScreen();
+}
+
+function addScreen() {
+    var str = '<div style="position:relative;width:calc(100% + .25rem)">';
+    screens.forEach(function (screen) {
+        str +=
+            '<img src="' +
+            screen +
+            '" style="width:calc(10% - 0.5rem)" class="m-1" />';
+    });
+    str += "</div>";
+    document.getElementById("screens-container").innerHTML = str;
 }
 
 function failed(e) {
@@ -132,6 +122,3 @@ function failed(e) {
             break;
     }
 }
-
-loadVideo();
-setInterval(() => loadVideo(), 10000);
