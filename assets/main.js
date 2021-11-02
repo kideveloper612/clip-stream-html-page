@@ -108,16 +108,16 @@ function initialLoad() {
 
                 totalTime =
                     parseFloat(timeSlots[0]) * 60 + parseFloat(timeSlots[1]);
-            } else if (timeSlots.length === 1) {
-                if (!isNumeric(time)) {
-                    alert("Wrong format for time!");
-                    return;
-                }
+            } else {
+                alert("Wrong format for time!");
 
-                totalTime = parseFloat(time);
+                return;
             }
-            if (totalTime > video_preview.duration)
-                totalTime = video_preview.duration;
+            if (totalTime > video_preview.duration) {
+                alert("Maximum time is limited by " + video_preview.duration);
+
+                return;
+            }
 
             video_preview.currentTime = totalTime;
         }
@@ -144,8 +144,8 @@ function takeScreen(time) {
 }
 
 function clickThumb(index) {
-    console.log(index);
     video_preview.currentTime = index;
+    document.getElementById("time").value = setTime(index);
 }
 
 function addScreen() {
