@@ -7,6 +7,32 @@ var reader = new FileReader();
 var auto = false;
 var interval;
 var initialFlag = true;
+var records = [];
+var blurIndex;
+
+function manageInterval(playTime = 0) {
+    (function repeat(i) {
+        setTimeout(function () {
+            var timestamp = playTime + 11 - i;
+
+            video.currentTime = timestamp;
+
+            if (--i) {
+                repeat(i);
+            } else {
+                interval = setInterval(function () {
+                    if (video.currentTime === video.duration) {
+                        clearInterval(interval);
+                    }
+
+                    if (!video_preview.paused) {
+                        video.currentTime = video_preview.currentTime + 10;
+                    }
+                }, 1000);
+            }
+        }, 200);
+    })(11);
+}
 
 function initialLoad() {
     screens = [];
@@ -29,31 +55,7 @@ function initialLoad() {
                 var self = this;
                 var playTime = self.currentTime;
 
-                (function repeat(i) {
-                    setTimeout(function () {
-                        var timestamp = playTime + 11 - i;
-
-                        video.currentTime = timestamp;
-
-                        if (--i) {
-                            repeat(i);
-                        } else {
-                            interval = setInterval(function () {
-                                if (
-                                    video_preview.currentTime ===
-                                    video_preview.duration
-                                ) {
-                                    clearInterval(interval);
-                                }
-
-                                if (!video_preview.paused) {
-                                    video.currentTime =
-                                        video_preview.currentTime + 10;
-                                }
-                            }, 1000);
-                        }
-                    }, 200);
-                })(11);
+                manageInterval(playTime);
             }
         });
 
@@ -68,33 +70,7 @@ function initialLoad() {
                 if (!video.hasLoaded) {
                     video.hasLoaded = true;
 
-                    var self = this;
-
-                    (function repeat(i) {
-                        setTimeout(function () {
-                            var timestamp = 11 - i;
-
-                            self.currentTime = timestamp;
-
-                            if (--i) {
-                                repeat(i);
-                            } else {
-                                interval = setInterval(function () {
-                                    if (
-                                        video_preview.currentTime ===
-                                        video_preview.duration
-                                    ) {
-                                        clearInterval(interval);
-                                    }
-
-                                    if (!video_preview.paused) {
-                                        self.currentTime =
-                                            video_preview.currentTime + 10;
-                                    }
-                                }, 1000);
-                            }
-                        }, 200);
-                    })(11);
+                    manageInterval();
                 }
             },
             false
@@ -103,6 +79,9 @@ function initialLoad() {
         video.addEventListener(
             "seeked",
             function () {
+                document.getElementById("times").value = Math.round(
+                    video_preview.currentTime
+                );
                 takeScreen(this.currentTime);
             },
             false
@@ -114,6 +93,15 @@ function initialLoad() {
             document.querySelector("input[type=file]").files[0]
         );
     }
+
+    document.getElementById("times").addEventListener("keyup", function (e) {
+        if (e.key === "Enter" || e.keyCode === 13) {
+            let time = e.target.value;
+            if (time > video_preview.duration) time = video_preview.duration;
+
+            video_preview.currentTime = time;
+        }
+    });
 }
 
 function takeScreen(time) {
@@ -178,4 +166,96 @@ function failed(e) {
             console.log("An unknown error occurred.");
             break;
     }
+}
+
+function displayRecords() {
+    var tbody = document.getElementById("tbody");
+
+    var tr = "";
+    records.forEach(function (record) {
+        tr +=
+            '<tr onclick="clickRecord(' +
+            record.id +
+            ')"><th scope="row">' +
+            record.id +
+            "</th><td>" +
+            record.concept +
+            "</td><td>" +
+            record.name +
+            "</td><td>" +
+            record.link +
+            "</td></tr>";
+    });
+
+    tbody.innerHTML = tr;
+}
+
+function addRecord() {
+    let concept = document.getElementById("concept").value;
+    let name = document.getElementById("name").value;
+    let link = document.getElementById("link").value;
+
+    if (concept == "" || name == "" || link == "") {
+        alert("Please insert all values!");
+        return;
+    }
+
+    let id = records.length + 1;
+    blurIndex = id;
+
+    records.push({
+        id,
+        concept,
+        name,
+        link,
+    });
+
+    displayRecords();
+}
+
+function clickRecord(id) {
+    let clickItem = records.find((o) => o.id === id);
+
+    document.getElementById("concept").value = clickItem.concept;
+    document.getElementById("name").value = clickItem.name;
+    document.getElementById("link").value = clickItem.link;
+
+    blurIndex = id;
+}
+
+function changeRecord() {
+    if (typeof blurIndex === "undefined") return;
+
+    let concept = document.getElementById("concept").value;
+    let name = document.getElementById("name").value;
+    let link = document.getElementById("link").value;
+    let id = blurIndex;
+
+    records.find((o, i) => {
+        if (o.id === id) {
+            records[i] = { id, concept, name, link };
+            return true;
+        }
+    });
+
+    displayRecords();
+}
+
+function removeRecord() {
+    if (typeof blurIndex === "undefined") return;
+
+    for (var i = 0; i < records.length; i++) {
+        if (records[i].id === blurIndex) {
+            records.splice(i, 1);
+            i--;
+
+            if (blurIndex > 1) blurIndex -= 1;
+        }
+
+        if (records[i] && records[i].id > blurIndex) {
+            records[i].id -= 1;
+        }
+    }
+
+    displayRecords();
 }
