@@ -79,7 +79,7 @@ function initialLoad() {
         video.addEventListener(
             "seeked",
             function () {
-                document.getElementById("times").value = Math.round(
+                document.getElementById("time").value = setTime(
                     video_preview.currentTime
                 );
                 takeScreen(this.currentTime);
@@ -94,12 +94,32 @@ function initialLoad() {
         );
     }
 
-    document.getElementById("times").addEventListener("keyup", function (e) {
+    document.getElementById("time").addEventListener("keyup", function (e) {
         if (e.key === "Enter" || e.keyCode === 13) {
             let time = e.target.value;
-            if (time > video_preview.duration) time = video_preview.duration;
 
-            video_preview.currentTime = time;
+            let timeSlots = time.split(":");
+            let totalTime = 0;
+            if (timeSlots.length > 1) {
+                if (!isNumeric(timeSlots[0]) || !isNumeric(timeSlots[1])) {
+                    alert("Wrong format for time!");
+                    return;
+                }
+
+                totalTime =
+                    parseFloat(timeSlots[0]) * 60 + parseFloat(timeSlots[1]);
+            } else if (timeSlots.length === 1) {
+                if (!isNumeric(time)) {
+                    alert("Wrong format for time!");
+                    return;
+                }
+
+                totalTime = parseFloat(time);
+            }
+            if (totalTime > video_preview.duration)
+                totalTime = video_preview.duration;
+
+            video_preview.currentTime = totalTime;
         }
     });
 }
@@ -179,6 +199,8 @@ function displayRecords() {
             ')"><th scope="row">' +
             record.id +
             "</th><td>" +
+            record.time +
+            "</th><td>" +
             record.concept +
             "</td><td>" +
             record.name +
@@ -191,11 +213,12 @@ function displayRecords() {
 }
 
 function addRecord() {
+    let time = document.getElementById("time").value;
     let concept = document.getElementById("concept").value;
     let name = document.getElementById("name").value;
     let link = document.getElementById("link").value;
 
-    if (concept == "" || name == "" || link == "") {
+    if (time == "" || concept == "" || name == "" || link == "") {
         alert("Please insert all values!");
         return;
     }
@@ -205,6 +228,7 @@ function addRecord() {
 
     records.push({
         id,
+        time,
         concept,
         name,
         link,
@@ -216,6 +240,7 @@ function addRecord() {
 function clickRecord(id) {
     let clickItem = records.find((o) => o.id === id);
 
+    document.getElementById("time").value = clickItem.time;
     document.getElementById("concept").value = clickItem.concept;
     document.getElementById("name").value = clickItem.name;
     document.getElementById("link").value = clickItem.link;
@@ -226,6 +251,7 @@ function clickRecord(id) {
 function changeRecord() {
     if (typeof blurIndex === "undefined") return;
 
+    let time = document.getElementById("time").value;
     let concept = document.getElementById("concept").value;
     let name = document.getElementById("name").value;
     let link = document.getElementById("link").value;
@@ -233,7 +259,7 @@ function changeRecord() {
 
     records.find((o, i) => {
         if (o.id === id) {
-            records[i] = { id, concept, name, link };
+            records[i] = { id, time, concept, name, link };
             return true;
         }
     });
@@ -258,4 +284,29 @@ function removeRecord() {
     }
 
     displayRecords();
+}
+
+function setTime(totalSeconds) {
+    totalSeconds = Math.round(totalSeconds);
+
+    let seconds = pad(totalSeconds % 60);
+    let minutes = pad(parseInt(totalSeconds / 60));
+
+    let timeDisplay = minutes + ":" + seconds;
+
+    return timeDisplay;
+}
+
+function pad(val) {
+    var valString = val + "";
+    if (valString.length < 2) {
+        return "0" + valString;
+    } else {
+        return valString;
+    }
+}
+
+function isNumeric(str) {
+    if (typeof str != "string") return false;
+    return !isNaN(str) && !isNaN(parseFloat(str));
 }

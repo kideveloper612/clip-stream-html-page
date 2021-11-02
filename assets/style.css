@@ -7,7 +7,8 @@
 }
 
 .mediaWrapper textarea {
-    min-height: 500px;
+    min-height: 800px;
+    overflow: scroll;
 }
 
 .videoWrapper {
@@ -33,4 +34,24 @@
 
 .col-form-label {
     text-align: end;
+}
+
+.table-wrapper {
+    overflow: scroll;
+    height: 200px;
+    text-align: center;
+}
+
+.table-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.table-wrapper table {
+    margin-top: 0px !important;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    background: #ddd !important;
 }
