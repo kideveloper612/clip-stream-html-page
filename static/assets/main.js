@@ -9,6 +9,7 @@ var interval;
 var initialFlag = true;
 var records = [];
 var blurIndex;
+var videoName;
 
 function manageInterval(playTime = 0) {
     (function repeat(i) {
@@ -89,9 +90,10 @@ function initialLoad() {
     };
 
     if (document.querySelector("input[type=file]").files.length > 0) {
-        reader.readAsDataURL(
-            document.querySelector("input[type=file]").files[0]
-        );
+        const file = document.querySelector("input[type=file]").files[0];
+        reader.readAsDataURL(file);
+
+        videoName = file.name || "";
     }
 
     document.getElementById("time").addEventListener("keyup", function (e) {
@@ -197,8 +199,6 @@ function displayRecords() {
             '<tr onclick="clickRecord(' +
             record.id +
             ')"><th scope="row">' +
-            record.id +
-            "</th><td>" +
             record.time +
             "</th><td>" +
             record.concept +
@@ -226,19 +226,33 @@ function addRecord() {
     let id = records.length + 1;
     blurIndex = id;
 
-    records.push({
+    let newRecord = {
         id,
+        videoName,
         time,
         concept,
         name,
         link,
-    });
+    };
+
+    ajaxCall("/add", JSON.stringify(newRecord))
+        .then((res) => {
+            if (res.status === "ok") {
+                alert(res.message);
+                records.push(newRecord);
+            } else {
+                alert(res.message);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 
     displayRecords();
 }
 
 function clickRecord(id) {
-    let clickItem = records.find((o) => o.id === id);
+    let clickItem = records.find((o) => parseInt(o.id) === parseInt(id));
 
     document.getElementById("time").value = clickItem.time;
     document.getElementById("concept").value = clickItem.concept;
@@ -265,6 +279,26 @@ function changeRecord() {
     });
 
     displayRecords();
+}
+
+function ajaxCall(url, data) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (res) {
+                console.log(res);
+                resolve(res);
+            },
+            error: function (err) {
+                reject(err);
+            },
+        });
+    });
 }
 
 function removeRecord() {
@@ -309,4 +343,8 @@ function pad(val) {
 function isNumeric(str) {
     if (typeof str != "string") return false;
     return !isNaN(str) && !isNaN(parseFloat(str));
+}
+
+function initialRecords(lists) {
+    records = [...lists];
 }
