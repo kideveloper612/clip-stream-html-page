@@ -10,6 +10,7 @@ var initialFlag = true;
 var records = [];
 var blurIndex;
 var videoName;
+var toastBody = document.getElementsByClassName("toast-body")[0];
 
 function manageInterval(playTime = 0) {
     (function repeat(i) {
@@ -280,18 +281,36 @@ async function addRecord() {
 
     await ajaxCall("/add", JSON.stringify(newRecord))
         .then((res) => {
-            if (res.status === "ok") {
-                alert(res.message);
-                records.push(newRecord);
-            } else {
-                alert(res.message);
-            }
+            alertMessage(res);
+
+            records.push(newRecord);
         })
         .catch((err) => {
             console.log(err);
         });
 
     displayRecords();
+}
+
+function alertMessage(res) {
+    toastBody.innerText = res.message;
+
+    if (res.status === "ok") {
+        document
+            .getElementsByClassName("toast")[0]
+            .classList.remove("bg-danger");
+        document.getElementsByClassName("toast")[0].classList.add("bg-primary");
+
+        $(".toast").toast("show");
+    } else {
+        document
+            .getElementsByClassName("toast")[0]
+            .classList.remove("bg-primary");
+
+        $(".toast").toast("show");
+
+        document.getElementsByClassName("toast")[0].classList.add("bg-danger");
+    }
 }
 
 function clickRecord(id) {
@@ -316,17 +335,14 @@ async function changeRecord() {
 
     await ajaxCall("/change", JSON.stringify({ id, time, concept, name, link }))
         .then((res) => {
-            if (res.status === "ok") {
-                alert(res.message);
-                records.find((o, i) => {
-                    if (o.id === id) {
-                        records[i] = { id, time, concept, name, link };
-                        return true;
-                    }
-                });
-            } else {
-                alert(res.message);
-            }
+            alertMessage(res);
+
+            records.find((o, i) => {
+                if (o.id === id) {
+                    records[i] = { id, time, concept, name, link };
+                    return true;
+                }
+            });
         })
         .catch((err) => {
             console.log(err);
@@ -359,22 +375,19 @@ async function removeRecord() {
 
     await ajaxCall("/remove", JSON.stringify({ id: blurIndex }))
         .then((res) => {
-            if (res.status === "ok") {
-                alert(res.message);
-                for (var i = 0; i < records.length; i++) {
-                    if (records[i].id === blurIndex) {
-                        records.splice(i, 1);
-                        i--;
+            alertMessage(res);
 
-                        if (blurIndex > 1) blurIndex -= 1;
-                    }
+            for (var i = 0; i < records.length; i++) {
+                if (records[i].id === blurIndex) {
+                    records.splice(i, 1);
+                    i--;
 
-                    if (records[i] && records[i].id > blurIndex) {
-                        records[i].id -= 1;
-                    }
+                    if (blurIndex > 1) blurIndex -= 1;
                 }
-            } else {
-                alert(res.message);
+
+                if (records[i] && records[i].id > blurIndex) {
+                    records[i].id -= 1;
+                }
             }
         })
         .catch((err) => {
@@ -385,7 +398,7 @@ async function removeRecord() {
 }
 
 function setTime(totalSeconds) {
-    totalSeconds = Math.round(totalSeconds);
+    totalSeconds = Math.floor(totalSeconds);
 
     let seconds = pad(totalSeconds % 60);
     let minutes = pad(parseInt(totalSeconds / 60));
@@ -424,3 +437,9 @@ function isValidHttpUrl(string) {
 
     return url.protocol === "http:" || url.protocol === "https:";
 }
+
+$(document).ready(function () {
+    $(".toast").toast({
+        delay: 3000,
+    });
+});
