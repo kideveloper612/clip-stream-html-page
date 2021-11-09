@@ -223,7 +223,7 @@ function displayRecords() {
         listItem +=
             '<a href="' +
             record["link"] +
-            '" class="list-group-item list-group-item-action flex-column align-items-start">' +
+            '" class="list-group-item list-group-item-action flex-column align-items-start" target=”_blank”>' +
             '<div class="d-flex w-100 justify-content-between">' +
             '<h5 class="mb-1">' +
             record.time +
@@ -256,8 +256,13 @@ async function addRecord() {
         return;
     }
 
-    if (!isValidHttpUrl) {
+    if (!isValidHttpUrl(link)) {
         alert("Please put valid url!");
+        return;
+    }
+
+    if (typeof videoName === "undefined") {
+        alert("Please upload video first!");
         return;
     }
 
