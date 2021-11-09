@@ -35,7 +35,7 @@ function manageInterval(playTime = 0) {
     })(11);
 }
 
-function initialLoad() {
+async function initialLoad() {
     screens = [];
 
     reader.onload = function (e) {
@@ -94,6 +94,16 @@ function initialLoad() {
         reader.readAsDataURL(file);
 
         videoName = file.name || "";
+
+        await ajaxCall("/upload", JSON.stringify({ videoName }))
+            .then((res) => {
+                if (res.status === "ok") {
+                    records = [...res.lists];
+                } else alert("Error on adding new record");
+            })
+            .catch((err) => console.log(err));
+
+        displayRecords();
     }
 
     document.getElementById("time").addEventListener("keyup", function (e) {
@@ -212,7 +222,7 @@ function displayRecords() {
     tbody.innerHTML = tr;
 }
 
-function addRecord() {
+async function addRecord() {
     let time = document.getElementById("time").value;
     let concept = document.getElementById("concept").value;
     let name = document.getElementById("name").value;
@@ -235,7 +245,7 @@ function addRecord() {
         link,
     };
 
-    ajaxCall("/add", JSON.stringify(newRecord))
+    await ajaxCall("/add", JSON.stringify(newRecord))
         .then((res) => {
             if (res.status === "ok") {
                 alert(res.message);
@@ -262,7 +272,7 @@ function clickRecord(id) {
     blurIndex = id;
 }
 
-function changeRecord() {
+async function changeRecord() {
     if (typeof blurIndex === "undefined") return;
 
     let time = document.getElementById("time").value;
@@ -271,12 +281,23 @@ function changeRecord() {
     let link = document.getElementById("link").value;
     let id = blurIndex;
 
-    records.find((o, i) => {
-        if (o.id === id) {
-            records[i] = { id, time, concept, name, link };
-            return true;
-        }
-    });
+    await ajaxCall("/change", JSON.stringify({ id, time, concept, name, link }))
+        .then((res) => {
+            if (res.status === "ok") {
+                alert(res.message);
+                records.find((o, i) => {
+                    if (o.id === id) {
+                        records[i] = { id, time, concept, name, link };
+                        return true;
+                    }
+                });
+            } else {
+                alert(res.message);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 
     displayRecords();
 }
@@ -291,7 +312,6 @@ function ajaxCall(url, data) {
             dataType: "json",
             async: false,
             success: function (res) {
-                console.log(res);
                 resolve(res);
             },
             error: function (err) {
@@ -301,21 +321,32 @@ function ajaxCall(url, data) {
     });
 }
 
-function removeRecord() {
+async function removeRecord() {
     if (typeof blurIndex === "undefined") return;
 
-    for (var i = 0; i < records.length; i++) {
-        if (records[i].id === blurIndex) {
-            records.splice(i, 1);
-            i--;
+    await ajaxCall("/remove", JSON.stringify({ id: blurIndex }))
+        .then((res) => {
+            if (res.status === "ok") {
+                alert(res.message);
+                for (var i = 0; i < records.length; i++) {
+                    if (records[i].id === blurIndex) {
+                        records.splice(i, 1);
+                        i--;
 
-            if (blurIndex > 1) blurIndex -= 1;
-        }
+                        if (blurIndex > 1) blurIndex -= 1;
+                    }
 
-        if (records[i] && records[i].id > blurIndex) {
-            records[i].id -= 1;
-        }
-    }
+                    if (records[i] && records[i].id > blurIndex) {
+                        records[i].id -= 1;
+                    }
+                }
+            } else {
+                alert(res.message);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 
     displayRecords();
 }

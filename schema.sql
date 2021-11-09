@@ -2,8 +2,8 @@ DROP TABLE IF EXISTS records;
 
 CREATE TABLE records (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    time_slot TEXT NOT NULL,
     video TEXT NOT NULL,
-    time_slot INTEGER NOT NULL,
     concept TEXT NOT NULL,
     name TEXT NOT NULL,
     link TEXT NOT NULL,
