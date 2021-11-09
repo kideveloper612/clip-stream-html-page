@@ -6,9 +6,13 @@
     min-height: 500px;
 }
 
-.mediaWrapper textarea {
-    min-height: 800px;
+.mediaWrapper .list-group {
+    max-height: 800px;
     overflow: scroll;
+}
+
+.list-group::-webkit-scrollbar {
+    display: none;
 }
 
 .videoWrapper {

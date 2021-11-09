@@ -202,8 +202,10 @@ function failed(e) {
 
 function displayRecords() {
     var tbody = document.getElementById("tbody");
+    let listGroup = document.getElementById("highlight");
 
     var tr = "";
+    let listItem = "";
     records.forEach(function (record) {
         tr +=
             '<tr onclick="clickRecord(' +
@@ -217,9 +219,30 @@ function displayRecords() {
             "</td><td>" +
             record.link +
             "</td></tr>";
+
+        listItem +=
+            '<a href="' +
+            record["link"] +
+            '" class="list-group-item list-group-item-action flex-column align-items-start">' +
+            '<div class="d-flex w-100 justify-content-between">' +
+            '<h5 class="mb-1">' +
+            record.time +
+            "</h5>" +
+            '<small class="text-muted">' +
+            record.concept +
+            "</small>" +
+            "</div>" +
+            '<p class="mb-1">' +
+            record.name +
+            "</p>" +
+            '<small class="text-muted">' +
+            record.link +
+            "</small>" +
+            "</a>";
     });
 
     tbody.innerHTML = tr;
+    listGroup.innerHTML = listItem;
 }
 
 async function addRecord() {
@@ -230,6 +253,11 @@ async function addRecord() {
 
     if (time == "" || concept == "" || name == "" || link == "") {
         alert("Please insert all values!");
+        return;
+    }
+
+    if (!isValidHttpUrl) {
+        alert("Please put valid url!");
         return;
     }
 
@@ -378,4 +406,16 @@ function isNumeric(str) {
 
 function initialRecords(lists) {
     records = [...lists];
+}
+
+function isValidHttpUrl(string) {
+    let url;
+
+    try {
+        url = new URL(string);
+    } catch (_) {
+        return false;
+    }
+
+    return url.protocol === "http:" || url.protocol === "https:";
 }
