@@ -105,6 +105,7 @@ async function initialLoad() {
             .catch((err) => console.log(err));
 
         displayRecords();
+        initialize(0);
     }
 
     document.getElementById("time").addEventListener("keyup", function (e) {
@@ -245,6 +246,14 @@ function displayRecords() {
     tbody.innerHTML = tr;
     listGroup.innerHTML = listItem;
 }
+function initialize(index) {
+    if (index >= 0){
+        document.getElementById("time").value = '00:00';
+    }
+    document.getElementById("concept").value = '';
+    document.getElementById("name").value = '';
+    document.getElementById("link").value = '';
+}
 
 async function addRecord() {
     let time = document.getElementById("time").value;
@@ -282,14 +291,16 @@ async function addRecord() {
     await ajaxCall("/add", JSON.stringify(newRecord))
         .then((res) => {
             alertMessage(res);
-
-            records.push(newRecord);
+            if (res.status === "ok"){
+                records.push(newRecord);
+            }
         })
         .catch((err) => {
             console.log(err);
         });
 
     displayRecords();
+    initialize(0);
 }
 
 function alertMessage(res) {
@@ -349,6 +360,7 @@ async function changeRecord() {
         });
 
     displayRecords();
+    initialize(0);
 }
 
 function ajaxCall(url, data) {
@@ -395,6 +407,7 @@ async function removeRecord() {
         });
 
     displayRecords();
+    initialize(0);
 }
 
 function setTime(totalSeconds) {

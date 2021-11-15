@@ -1,10 +1,9 @@
 import sqlite3
 from flask import *
+import logging
 
 
-UPLOAD_FOLDER = './uploads'
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 def get_db_connection():
@@ -21,10 +20,10 @@ def hello_world():
 @app.route("/upload", methods=['POST'])
 def upload_video():
     if request.method == 'POST':
+        con = get_db_connection()
         try:
             video_name = request.json["videoName"]
 
-            con = get_db_connection()
             todos = con.execute('SELECT * from records where video="{}" order by time_slot;'.format(video_name)).fetchall()
 
             lists = []
@@ -51,13 +50,14 @@ def upload_video():
             }
 
         finally:
-            return msg
             con.close()
+            return msg
 
 
 @app.route('/add', methods=['POST'])
 def add_record():
     if request.method == 'POST':
+        con = get_db_connection()
         try:
             data = request.json
 
@@ -67,17 +67,26 @@ def add_record():
             name = data['name']
             link = data['link']
 
-            con = get_db_connection()
-
             cur = con.cursor()
-            cur.execute("INSERT INTO records (video, time_slot, concept, name, link) VALUES(?, ?, ?, ?, ?)"
-                        , (video, time, concept, name, link))
+            query_str = 'SELECT * from records where video="{0}" and time_slot="{1}";'.format(video, time)
+            rows = cur.execute(query_str).fetchall()
+            if rows:
+                cur.execute("UPDATE records SET concept = ?, name = ?, link = ? WHERE time_slot = ?",
+                            (concept, name, link, time))
+                msg = {
+                    "status": "update",
+                    "message": "Record successfully updated"
+                }
+            else:
+                cur.execute("INSERT INTO records (video, time_slot, concept, name, link) VALUES(?, ?, ?, ?, ?)"
+                            , (video, time, concept, name, link))
+                msg = {
+                    "status": "ok",
+                    "message": "Record successfully added"
+                }
 
             con.commit()
-            msg = {
-                "status": "ok",
-                "message": "Record successfully added"
-            }
+
 
         except:
             con.rollback()
@@ -94,16 +103,15 @@ def add_record():
 @app.route('/change', methods=['POST'])
 def change_record():
     if request.method == 'POST':
+        con = get_db_connection()
         try:
             data = request.json
 
-            record_id =data['id']
+            record_id = data['id']
             time = data['time']
             concept = data['concept']
             name = data['name']
             link = data['link']
-
-            con = get_db_connection()
 
             cur = con.cursor()
 
@@ -131,10 +139,9 @@ def change_record():
 @app.route('/remove', methods=['POST'])
 def remove_record():
     if request.method == 'POST':
+        con = get_db_connection()
         try:
             remove_id = request.json['id']
-
-            con = get_db_connection()
 
             cur = con.cursor()
 
@@ -147,7 +154,7 @@ def remove_record():
             }
 
         except Exception as e:
-            print(e)
+            logging.error(e)
             con.rollback()
             msg = {
                 "status": "error",
