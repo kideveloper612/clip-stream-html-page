@@ -104,4 +104,10 @@
         </div>
     </div>
 </form>
+
+<script src="{{ url_for('static', filename='assets/js/utils.js')}}"></script>
+<script src="{{ url_for('static', filename='assets/js/main.js')}}"></script>
+<script type="text/javascript">
+    initialRecords({{ lists | tojson}})
+</script>
 {% endblock %}
