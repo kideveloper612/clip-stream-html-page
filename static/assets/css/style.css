@@ -1,0 +1,61 @@
+:root {
+    box-sizing: border-box;
+}
+
+.mediaWrapper {
+    min-height: 500px;
+}
+
+.mediaWrapper .list-group {
+    max-height: 800px;
+    overflow: scroll;
+}
+
+.list-group::-webkit-scrollbar {
+    display: none;
+}
+
+.videoWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.imageWrapper canvas {
+    width: calc(10% - 0.5rem);
+}
+
+.videoWrapper video {
+    width: 100%;
+}
+.textAreaWrapper {
+    height: 100%;
+}
+
+.textAreaWrapper > textarea {
+    height: 100%;
+}
+
+.col-form-label {
+    text-align: end;
+}
+
+.table-wrapper {
+    overflow: scroll;
+    max-height: 200px;
+    text-align: center;
+}
+
+.table-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.table-wrapper table {
+    margin-top: 0px !important;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    background: #ddd !important;
+}

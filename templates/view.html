@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block edit_page %}
+<form class="mt-4">
+    <div class="row mediaWrapper g-3 mx-5">
+
+        <div class="col-12 col-md-8 videoWrapper">
+            <div class="mx-2">
+                <video id="video_preview" onerror="failed(event)" controls="controls" preload="none" muted
+                    style="width: 100%"></video>
+                <video id="video" onerror="failed(event)" controls="controls" preload="none" muted
+                    style="display:none"></video>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <a href="javascript:void(0)" class="btn btn-sm btn-primary btn-block w-100"
+                        onClick="$('[type=\'file\']').trigger('click')">
+                        <i class="fa fa-upload"></i> Load Video
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="/edit" class="btn btn-sm btn-primary btn-block w-100">
+                        <i class="fa fa-upload"></i> To Edit
+                    </a>
+                </div>
+            </div>
+            <form id="uploadForm">
+                <input type="file" name="file" accept="video/*" style="display: none" onchange="initialLoad(event)">
+            </form>
+            <div id="loading-container" style="display:none"></div>
+            <div class="imageWrapper my-3">
+                <div id="screens-container"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 textAreaWrapper">
+            <div class="list-group" id="highlight">
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

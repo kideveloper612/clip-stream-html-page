@@ -13,16 +13,26 @@ def get_db_connection():
 
 
 @app.route('/')
-def hello_world():
-    return render_template('index.html', lists=[])
+def index():
+    return render_template('view.html', lists=[])
 
 
-@app.route("/upload", methods=['POST'])
-def upload_video():
+@app.route('/view')
+def view():
+    return redirect('/')
+
+
+@app.route('/edit')
+def edit():
+    return render_template('edit.html', lists=[])
+
+
+@app.route("/fetch", methods=['POST'])
+def fetch():
     if request.method == 'POST':
         con = get_db_connection()
         try:
-            video_name = request.json["videoName"]
+            video_name = request.json['videoName']
 
             todos = con.execute('SELECT * from records where video="{}" order by time_slot;'.format(video_name)).fetchall()
 
@@ -51,6 +61,29 @@ def upload_video():
 
         finally:
             con.close()
+            return msg
+
+
+@app.route("/upload", methods=['POST'])
+def upload_video():
+    if request.method == 'POST':
+        try:
+            file = request.files['file']
+            video_name = file.filename
+
+            if video_name != '':
+                file.save("videos/{}".format(video_name))
+
+            msg = {
+                "status": "ok",
+            }
+
+        except:
+            msg = {
+                "status": "error",
+            }
+
+        finally:
             return msg
 
 
