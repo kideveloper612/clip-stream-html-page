@@ -116,6 +116,7 @@ async function initialLoad() {
         video.addEventListener(
             "seeked",
             function () {
+                displayRecords();
                 takeScreen(this.currentTime);
             },
             false
@@ -136,8 +137,6 @@ async function initialLoad() {
             })
             .catch((err) => console.log(err));
 
-        displayRecords();
-
         let formData = new FormData();
         formData.append("file", file);
         fetch("/upload", {
@@ -155,33 +154,46 @@ async function initialLoad() {
     }
 }
 
+function compareTimeSlot(recordTime, videoTime) {
+    let recordSlots = recordTime.split(":");
+    let totalRecordTime =
+        parseInt(recordSlots[0] * 60) + parseInt(recordSlots[1]);
+
+    if (totalRecordTime === Math.floor(videoTime)) return true;
+    return false;
+}
+
 function displayRecords() {
-    let listGroup = document.getElementById("highlight");
-
-    let listItem = "";
     records.forEach(function (record) {
-        listItem +=
-            '<a href="' +
-            record["link"] +
-            '" class="list-group-item list-group-item-action flex-column align-items-start" target=”_blank”>' +
-            '<div class="d-flex w-100 justify-content-between">' +
-            '<h5 class="mb-1">' +
-            record.time +
-            "</h5>" +
-            '<small class="text-muted">' +
-            record.concept +
-            "</small>" +
-            "</div>" +
-            '<p class="mb-1">' +
-            record.name +
-            "</p>" +
-            '<small class="text-muted">' +
-            record.link +
-            "</small>" +
-            "</a>";
-    });
+        if (compareTimeSlot(record.time, video_preview.currentTime)) {
+            let $listItem = $(
+                '<a href="' +
+                    record["link"] +
+                    '" class="list-group-item list-group-item-action flex-column align-items-start" target=”_blank”>' +
+                    '<div class="d-flex w-100 justify-content-between">' +
+                    '<h5 class="mb-1">' +
+                    record.time +
+                    "</h5>" +
+                    '<small class="text-muted">' +
+                    record.concept +
+                    "</small>" +
+                    "</div>" +
+                    '<p class="mb-1">' +
+                    record.name +
+                    "</p>" +
+                    '<small class="text-muted">' +
+                    record.link +
+                    "</small>" +
+                    "</a>"
+            );
 
-    listGroup.innerHTML = listItem;
+            $("#highlight").append($listItem);
+
+            setTimeout(function () {
+                $listItem.remove();
+            }, 4000);
+        }
+    });
 }
 
 function ajaxCall(url, data) {
