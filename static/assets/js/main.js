@@ -301,7 +301,7 @@ async function addRecord() {
         time,
         concept,
         name,
-        link,
+        link: addProtocol(link),
     };
 
     await ajaxCall("/add", JSON.stringify(newRecord))

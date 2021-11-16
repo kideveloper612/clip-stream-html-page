@@ -28,13 +28,21 @@ function initialRecords(lists) {
 }
 
 function isValidHttpUrl(string) {
-    let url;
+    const pattern = new RegExp(
+        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+            "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+            "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+            "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+            "(\\#[-a-z\\d_]*)?$",
+        "i"
+    );
+    return !!pattern.test(string);
+}
 
-    try {
-        url = new URL(string);
-    } catch (_) {
-        return false;
+function addProtocol(domain) {
+    if (domain.indexOf("http") === -1) {
+        return "http://" + domain;
     }
 
-    return url.protocol === "http:" || url.protocol === "https:";
+    return domain;
 }
