@@ -87,13 +87,14 @@ def upload_video():
             return msg
 
 
-@app.route('/add', methods=['POST'])
+@app.route('/update', methods=['POST'])
 def add_record():
     if request.method == 'POST':
         con = get_db_connection()
         try:
             data = request.json
 
+            record_id = data['id']
             video = data['videoName']
             time = data['time']
             concept = data['concept']
@@ -101,13 +102,20 @@ def add_record():
             link = data['link']
 
             cur = con.cursor()
+
+            cur.execute("UPDATE records SET time_slot = ?, concept = ?, name = ?, link = ? WHERE id = ?",
+                        (time, concept, name, link, record_id))
+
+            con.commit()
+
             query_str = 'SELECT * from records where video="{0}" and time_slot="{1}";'.format(video, time)
             rows = cur.execute(query_str).fetchall()
             if rows:
-                cur.execute("UPDATE records SET concept = ?, name = ?, link = ? WHERE time_slot = ?",
-                            (concept, name, link, time))
+                cur.execute("UPDATE records SET concept = ?, name = ?, link = ? WHERE video=? and time_slot = ?",
+                            (concept, name, link, video, time))
                 msg = {
-                    "status": "update",
+                    "status": "ok",
+                    "id": record_id,
                     "message": "Record successfully updated"
                 }
             else:
@@ -115,11 +123,11 @@ def add_record():
                             , (video, time, concept, name, link))
                 msg = {
                     "status": "ok",
-                    "message": "Record successfully added"
+                    "id": record_id,
+                    "message": "Record successfully updated"
                 }
 
             con.commit()
-
 
         except:
             con.rollback()

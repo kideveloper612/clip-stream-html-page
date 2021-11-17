@@ -292,8 +292,9 @@ async function addRecord() {
         return;
     }
 
-    let id = records.length + 1;
-    blurIndex = id;
+    let id;
+    if (blurIndex) id = blurIndex;
+    else id = records.length + 1;
 
     let newRecord = {
         id,
@@ -304,16 +305,25 @@ async function addRecord() {
         link: addProtocol(link),
     };
 
-    await ajaxCall("/add", JSON.stringify(newRecord))
+    await ajaxCall("/update", JSON.stringify(newRecord))
         .then((res) => {
             alertMessage(res);
             if (res.status === "ok") {
                 records.push(newRecord);
             }
+
+            records.find((o, i) => {
+                if (o.id === id) {
+                    records[i] = { id, time, concept, name, link };
+                    return true;
+                }
+            });
         })
         .catch((err) => {
             console.log(err);
         });
+
+    blurIndex = undefined;
 
     displayRecords();
     initialize(0);
@@ -349,34 +359,6 @@ function clickRecord(id) {
     document.getElementById("link").value = clickItem.link;
 
     blurIndex = id;
-}
-
-async function changeRecord() {
-    if (typeof blurIndex === "undefined") return;
-
-    let time = document.getElementById("time").value;
-    let concept = document.getElementById("concept").value;
-    let name = document.getElementById("name").value;
-    let link = document.getElementById("link").value;
-    let id = blurIndex;
-
-    await ajaxCall("/change", JSON.stringify({ id, time, concept, name, link }))
-        .then((res) => {
-            alertMessage(res);
-
-            records.find((o, i) => {
-                if (o.id === id) {
-                    records[i] = { id, time, concept, name, link };
-                    return true;
-                }
-            });
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-
-    displayRecords();
-    initialize(0);
 }
 
 function ajaxCall(url, data) {
