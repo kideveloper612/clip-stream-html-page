@@ -109,6 +109,7 @@ async function initialLoad() {
 
         let formData = new FormData();
         formData.append("file", file);
+
         fetch("/upload", {
             method: "POST",
             body: formData,
@@ -116,11 +117,16 @@ async function initialLoad() {
             .then((res) => {
                 if (res.status === 200) {
                     console.log("Successfully uploaded!");
+                    sessionStorage.setItem("videoFile", file.name);
                 } else {
                     console.log("Failed for uploading file!");
+                    sessionStorage.clear();
                 }
             })
-            .catch((err) => console.log(err));
+            .catch((err) => {
+                console.log(err);
+                sessionStorage.clear();
+            });
     }
 
     document.getElementById("time").addEventListener("keyup", function (e) {
@@ -408,20 +414,20 @@ async function removeRecord() {
     initialize(0);
 }
 
-function toEdit() {
-    console.log("---");
-    $(".edit-page").css("display", "none");
-    $(".view-page").css("display", "initial");
-}
-
-function toView() {
-    console.log("====");
-    $(".view-page").css("display", "none");
-    $(".edit-page").css("display", "initial");
-}
-
 $(document).ready(function () {
     $(".toast").toast({
         delay: 3000,
     });
+
+    let videoFile = sessionStorage.getItem("videoFile");
+
+    if (videoFile !== undefined || videoFile !== null) {
+        document
+            .querySelector("#video_preview > source")
+            .setAttribute("src", "static/videos/sample.mp4");
+
+        document.getElementById("video_preview").load();
+
+        initialLoad();
+    }
 });
