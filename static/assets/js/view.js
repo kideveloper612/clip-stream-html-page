@@ -18,6 +18,7 @@ async function initialLoad() {
 
     reader.onload = function (e) {
         video_preview.src = e.target.result;
+        video_preview.autoplay = true;
         video_preview.hasLoaded = false;
 
         video_preview.addEventListener("canplay", function () {
@@ -143,7 +144,6 @@ function clickThumb(index) {
 async function toggleLoad() {
     screens = [];
     video.hasLoaded = video_preview.hasLoaded = false;
-    $("#to-edit").addClass("disabled");
 
     video_preview.addEventListener("canplay", function () {
         video_preview.hasLoaded = true;
@@ -191,6 +191,8 @@ async function toggleLoad() {
 
     videoName = sessionStorage.getItem("videoFile") || "";
     if (!videoName) {
+        $("#to-edit").addClass("disabled");
+    } else {
         $("#to-edit").removeClass("disabled");
     }
 

@@ -45,6 +45,7 @@ async function initialLoad() {
         video.src = video_preview.src = e.target.result;
         video.autoplay = video_preview.autoplay = true;
         video.hasLoaded = video_preview.hasLoaded = false;
+        clearInterval(interval);
 
         video_preview.addEventListener("canplay", function () {
             video_preview.hasLoaded = true;
@@ -164,7 +165,6 @@ async function initialLoad() {
 async function toggleLoad() {
     screens = [];
 
-    // video.autoplay = video_preview.autoplay = true;
     video.hasLoaded = video_preview.hasLoaded = false;
 
     video_preview.addEventListener("canplay", function () {
@@ -185,6 +185,7 @@ async function toggleLoad() {
 
     video_preview.addEventListener("pause", function () {
         initialFlag = false;
+        video.pause();
         clearInterval(interval);
     });
 
@@ -411,6 +412,12 @@ async function addRecord() {
             alertMessage(res);
             if (res.status === "ok") {
                 records.push(newRecord);
+
+                records.sort((a, b) => {
+                    if (a.time > b.time) return 1;
+                    else if (a.time < b.time) return -1;
+                    return 0;
+                });
             }
 
             records.find((o, i) => {
@@ -526,7 +533,7 @@ $(document).ready(function () {
             .setAttribute("src", "static/videos/sample.mp4");
 
         document.getElementById("video_preview").load();
-        // document.getElementById("video").load();
+        document.getElementById("video").load();
 
         toggleLoad();
     }
