@@ -6,11 +6,11 @@
 
         <div class="col-12 col-md-8 videoWrapper">
             <div class="mx-2">
-                <video id="video_preview" onerror="failed(event)" controls preload="none" autoplay style="width: 100%">
+                <video id="video_preview" onerror="failed(event)" controls preload="none" muted style="width: 100%">
                     <source type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
-                <video id="video" onerror="failed(event)" controls preload="none" autoplay style="display:none">
+                <video id="video" onerror="failed(event)" controls preload="none" muted style="display:none">
                     <source type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
@@ -23,7 +23,7 @@
                     </a>
                 </div>
                 <div class="col-6">
-                    <a href="/edit" class="btn btn-sm btn-primary btn-block w-100">
+                    <a href="/edit" class="btn btn-sm btn-primary btn-block w-100" id="to-edit">
                         <i class="fa fa-upload"></i> To Edit
                     </a>
                 </div>

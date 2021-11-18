@@ -12,6 +12,65 @@ var records = [];
 var videoName;
 var isVideoPlaying;
 
+async function initialLoad() {
+    screens = [];
+    $("#to-edit").addClass("disabled");
+
+    reader.onload = function (e) {
+        video_preview.src = e.target.result;
+        video_preview.hasLoaded = false;
+
+        video_preview.addEventListener("canplay", function () {
+            video_preview.hasLoaded = true;
+        });
+    };
+
+    if (document.querySelector("input[type=file]").files.length > 0) {
+        const file = document.querySelector("input[type=file]").files[0];
+        reader.readAsDataURL(file);
+
+        videoName = file.name || "";
+
+        await ajaxCall("/fetch", JSON.stringify({ videoName }))
+            .then((res) => {
+                if (res.status === "ok") {
+                    records = [...res.lists];
+                } else alert("Error on adding new record");
+            })
+            .catch((err) => console.log(err));
+
+        isVideoPlaying = (video_preview) =>
+            !!(
+                video_preview.currentTime > 0 &&
+                !video_preview.paused &&
+                !video_preview.ended &&
+                video_preview.readyState > 2
+            );
+
+        let formData = new FormData();
+        formData.append("file", file);
+
+        fetch("/upload", {
+            method: "POST",
+            body: formData,
+        })
+            .then((res) => {
+                if (res.status === 200) {
+                    console.log("Successfully uploaded!");
+                    $("#to-edit").removeClass("disabled");
+                    sessionStorage.setItem("videoFile", file.name);
+                } else {
+                    console.log("Failed for uploading file!");
+                    sessionStorage.clear();
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+                sessionStorage.clear();
+            });
+    }
+}
+
 function manageInterval(playTime = 0) {
     (function repeat(i) {
         setTimeout(function () {
@@ -83,9 +142,8 @@ function clickThumb(index) {
 
 async function toggleLoad() {
     screens = [];
-
-    video.autoplay = video_preview.autoplay = true;
     video.hasLoaded = video_preview.hasLoaded = false;
+    $("#to-edit").addClass("disabled");
 
     video_preview.addEventListener("canplay", function () {
         video_preview.hasLoaded = true;
@@ -132,6 +190,9 @@ async function toggleLoad() {
     );
 
     videoName = sessionStorage.getItem("videoFile") || "";
+    if (!videoName) {
+        $("#to-edit").removeClass("disabled");
+    }
 
     await ajaxCall("/fetch", JSON.stringify({ videoName }))
         .then((res) => {
@@ -174,7 +235,6 @@ function compareTimeSlot(recordTime, videoTime) {
 }
 
 function displayRecords() {
-    console.log(records);
     records.forEach(function (record) {
         if (compareTimeSlot(record.time, video_preview.currentTime)) {
             let $listItem = $(
