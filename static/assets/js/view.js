@@ -294,7 +294,7 @@ $(document).ready(function () {
     if (videoFile !== undefined || videoFile !== null) {
         document
             .querySelector("#video_preview > source")
-            .setAttribute("src", "static/videos/sample.mp4");
+            .setAttribute("src", "static/videos/" + videoFile);
 
         document.getElementById("video_preview").load();
         toggleLoad();
